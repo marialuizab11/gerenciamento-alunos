@@ -44,4 +44,67 @@ public class AlunoServiceTest {
         Assert.assertThrows(ConstraintViolationException.class, () -> {
                 this.serviceAluno.save(aluno);});
     }
+
+    @Test
+    public void salvarComSucesso() {
+        Aluno aluno = new Aluno();
+        aluno.setNome("Maria Luiza");
+        aluno.setTurno(Turno.MATUTINO);
+        aluno.setCurso(Curso.INFORMATICA); 
+        aluno.setStatus(Status.ATIVO);
+        aluno.setMatricula("654321");
+        
+        this.serviceAluno.save(aluno);
+        
+        boolean encontrado = this.serviceAluno.findAll().stream()
+                .anyMatch(a -> a.getNome().equals("Maria Luiza"));
+        Assert.assertTrue(encontrado);
+    }
+
+    @Test(expected = java.util.NoSuchElementException.class)
+    public void excluirAluno() {
+        Aluno aluno = new Aluno();
+        aluno.setNome("Saulo");
+        aluno.setTurno(Turno.NOTURNO);
+        aluno.setCurso(Curso.DIREITO);
+        aluno.setStatus(Status.ATIVO);
+        aluno.setMatricula("000999");
+        this.serviceAluno.save(aluno);
+
+        this.serviceAluno.deleteById(aluno.getId());
+        
+        Aluno alunoDeletado = this.serviceAluno.getById(aluno.getId());
+        Assert.assertNull(alunoDeletado);
+    }
+
+    @Test
+    public void buscarPelaMatricula() {
+        Aluno aluno = new Aluno();
+        aluno.setNome("Paulo Rodrigues");
+        aluno.setTurno(Turno.MATUTINO);
+        aluno.setCurso(Curso.ADMINISTRACAO);
+        aluno.setStatus(Status.ATIVO);
+        aluno.setMatricula("888777");
+        this.serviceAluno.save(aluno);
+
+        aluno.setStatus(Status.INATIVO);
+        this.serviceAluno.save(aluno);
+        
+        Aluno alunoAlterado = this.serviceAluno.getById(aluno.getId());
+        Assert.assertEquals(Status.INATIVO, alunoAlterado.getStatus());
+    }
+
+    @Test
+    public void buscarAlunosAtivos() {
+        Aluno aluno = new Aluno();
+        aluno.setNome("Maria do Socorro");
+        aluno.setStatus(Status.ATIVO);
+        aluno.setTurno(Turno.NOTURNO);
+        aluno.setCurso(Curso.ADMINISTRACAO);
+        aluno.setMatricula("111222");
+        this.serviceAluno.save(aluno);
+
+        java.util.List<Aluno> ativos = this.serviceAluno.findAll();
+        Assert.assertFalse(ativos.isEmpty());
+    }
 }
